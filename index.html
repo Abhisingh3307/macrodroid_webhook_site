@@ -1,67 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MacroDroid Webhook Panel</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MacroDroid Automation</title>
 <style>
-  body { font-family: Arial, sans-serif; padding: 2rem; background: #f0f0f0; }
-  .panel { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 0 10px #ccc; max-width: 500px; margin: auto; }
-  input, button { padding: 0.6rem 1rem; width: 90%; margin: 0.5rem auto; border-radius: 4px; }
-  #log { margin-top: 1rem; max-height: 150px; overflow-y: auto; font-size: 0.9rem; background: #fafafa; padding: 0.5rem; border: 1px solid #ccc; }
-  .log-success { color: green; }
-  .log-fail { color: red; }
+  body {
+    background: linear-gradient(135deg, #a24dd3, #8e44ad);
+    font-family: Arial, sans-serif;
+    padding: 1rem;
+    color: #fff;
+  }
+  h1 {
+    text-align: center;
+    color: #42f5e6;
+    text-shadow: 1px 1px 8px #000;
+    margin-bottom: 1rem;
+  }
+  .main-box, .command-box {
+    background: #222;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
+  label {
+    display: block;
+    margin-top: 0.5rem;
+  }
+  input {
+    width: 100%;
+    padding: 0.4rem;
+    border: none;
+    border-radius: 4px;
+    margin-top: 0.2rem;
+  }
+  button {
+    background: #e91e63;
+    padding: 0.3rem 0.7rem;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    margin-top: 0.3rem;
+  }
+  button:hover {
+    background: #c2185b;
+  }
+  .logs {
+    background: #333;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+    height: 200px;
+    overflow-y: auto;
+    font-size: 0.9rem;
+  }
+  .log-entry {
+    padding: 0.2rem;
+    border-bottom: 1px solid #555;
+  }
+  .log-entry.success { color: #2ecc71; }
+  .log-entry.error { color: #e74c3c; }
 </style>
 </head>
 <body>
-  <div class="panel" id="setup-panel">
-    <h2>Set Webhook URL</h2>
-    <input id="webhook-url" placeholder="Enter MacroDroid webhook URL" />
-    <button onclick="saveUrl()">Save URL</button>
-  </div>
 
-  <div class="panel" id="control-panel" style="display:none;">
-    <h2>MacroDroid Actions</h2>
-    <button onclick="trigger('action1')">Action 1</button>
-    <button onclick="trigger('action2')">Action 2</button>
-    <button onclick="trigger('action3')">Action 3</button>
-    <button onclick="clearUrl()">Reset Webhook URL</button>
-    <div id="log"></div>
-  </div>
+<h1>MacroDroid Automation</h1>
+
+<div class="main-box">
+  <label>Enter Your Webhook URL:</label>
+  <input id="webhookUrl" placeholder="https://trigger.macrodroid.com/your-id/enablewebhook">
+  <small>Disclaimer: This site will never store your webhook URL. Developed with Abhishek Chauhan ❤️.</small>
+</div>
+
+<!-- Example Action -->
+<div class="command-box">
+  <h3>Popup (Toast)</h3>
+  <label>Input:</label>
+  <input id="toastInput" placeholder="Your Toast Message">
+  <button onclick="sendCommand('popup', { message: document.getElementById('toastInput').value })">Test</button>
+</div>
+
+<!-- Sabhi doosri commands bhi is tarah add kar lo -->
+
+<h3>Logs:</h3>
+<div class="logs" id="logPanel"></div>
 
 <script>
-  const setupPanel = document.getElementById('setup-panel');
-  const controlPanel = document.getElementById('control-panel');
-  const logDiv = document.getElementById('log');
+function logMessage(msg, isError=false) {
+  const logPanel = document.getElementById('logPanel');
+  const entry = document.createElement('div');
+  entry.textContent = msg;
+  entry.className = 'log-entry ' + (isError ? 'error' : 'success');
+  logPanel.prepend(entry);
+}
 
-  const webhookURL = localStorage.getItem('webhookURL');
-  if (webhookURL) { setupPanel.style.display = 'none'; controlPanel.style.display = 'block'; }
-
-  function saveUrl() {
-    const url = document.getElementById('webhook-url').value.trim();
-    if (url) { localStorage.setItem('webhookURL', url); location.reload(); }
+function sendCommand(endpoint, params) {
+  const urlInput = document.getElementById('webhookUrl').value;
+  if (!urlInput) {
+    logMessage('Error: Webhook URL not set!', true);
+    return;
   }
-
-  function clearUrl() {
-    localStorage.removeItem('webhookURL'); location.reload();
+  let fullUrl = urlInput + '?action=' + encodeURIComponent(endpoint);
+  if (params) {
+    for (const [k,v] of Object.entries(params)) {
+      fullUrl += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(v);
+    }
   }
-
-  async function trigger(action) {
-    const base = localStorage.getItem('webhookURL');
-    if (!base) return addLog('No webhook URL set!', false);
-    try {
-      const resp = await fetch(`${base}?action=${action}`);
-      if (resp.ok) addLog(`✅ Action ${action} triggered successfully!`, true);
-      else addLog(`❌ Action ${action} failed (status ${resp.status})`, false);
-    } catch (e) { addLog(`❌ Error triggering action ${action}: ${e}`, false); }
-  }
-
-  function addLog(msg, success) {
-    const p = document.createElement('p');
-    p.textContent = msg;
-    p.className = success ? 'log-success' : 'log-fail';
-    logDiv.appendChild(p); logDiv.scrollTop = logDiv.scrollHeight;
-  }
+  fetch(fullUrl).then(res => {
+    if(res.ok) logMessage(`Action "${endpoint}" successful ✅`);
+    else logMessage(`Action "${endpoint}" failed ❌ (status ${res.status})`, true);
+  }).catch(err => logMessage(`Error: ${err}`, true));
+}
 </script>
+
 </body>
 </html>
