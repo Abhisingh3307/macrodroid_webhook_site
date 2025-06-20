@@ -13,7 +13,7 @@
             padding: 20px;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
         }
         .container {
@@ -86,6 +86,19 @@
             width: 100px;
             height: auto;
         }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .navigation button {
+            flex: 1;
+            margin: 0 5px;
+            background-color: #2196f3;
+        }
+        .navigation button:hover {
+            background-color: #1976d2;
+        }
     </style>
 </head>
 <body>
@@ -96,7 +109,7 @@
         <h2>MacroDroid ऑटोमेशन</h2>
         <div id="webhookUrl">
             अपना वेबहुक URL नीचे दर्ज करें:<br>
-            <input type="text" id="webhookInput" placeholder="https://your-webhook-url">
+            <input type="text" id="webhookInput" value="https://trigger.macrodroid.com/978fcfa6-41bb-42cb-9b80-2a69d1d03d13/enablewebhook" placeholder="https://your-webhook-url">
             <button onclick="saveWebhook()">सेव करें</button>
         </div>
 
@@ -161,6 +174,12 @@
                 <button onclick="sendCommand('disableMD')">Disable MD</button>
             </div>
         </div>
+
+        <div class="navigation">
+            <button onclick="goHome()">Home</button>
+            <button onclick="goBack()">Back</button>
+            <button onclick="goRecent()">Recent</button>
+        </div>
     </div>
 
     <script>
@@ -168,7 +187,11 @@
 
         function saveWebhook() {
             webhookUrl = document.getElementById('webhookInput').value;
-            alert('वेबहुक URL सेव हो गया!');
+            if (webhookUrl) {
+                alert('वेबहुक URL सेव हो गया!');
+            } else {
+                alert('कृपया एक वैध URL दर्ज करें!');
+            }
         }
 
         function sendCommand(command) {
@@ -177,24 +200,42 @@
                 return;
             }
 
-            let data = {};
-            if (command === 'toast') data.message = document.getElementById('toastInput').value;
-            if (command === 'notification') data.message = document.getElementById('notificationInput').value;
-            if (command === 'speak') data.text = document.getElementById('speakInput').value;
-            if (command === 'float') data.text = document.getElementById('floatInput').value;
-            if (command === 'paste') data.text = document.getElementById('pasteInput').value;
-            if (command === 'dimScreen') data.value = document.getElementById('dimInput').value;
-            if (command === 'controlBrightness') data.value = document.getElementById('brightnessInput').value;
+            let data = { action: command };
+            if (command === 'toast') data.message = document.getElementById('toastInput').value || 'Default Toast';
+            if (command === 'notification') data.message = document.getElementById('notificationInput').value || 'Default Notification';
+            if (command === 'speak') data.text = document.getElementById('speakInput').value || 'Default Text';
+            if (command === 'float') data.text = document.getElementById('floatInput').value || 'Default Float';
+            if (command === 'paste') data.text = document.getElementById('pasteInput').value || 'Default Paste';
+            if (command === 'dimScreen') data.value = document.getElementById('dimInput').value || '50';
+            if (command === 'controlBrightness') data.value = document.getElementById('brightnessInput').value || '50';
 
             fetch(webhookUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
             .then(data => alert('कमांड भेजी गई: ' + command))
-            .catch(error => alert('कमांड भेजने में त्रुटि: ' + error));
+            .catch(error => alert('कमांड भेजने में त्रुटि: ' + error.message));
+        }
+
+        function goHome() {
+            alert('होम पर गए!');
+            // Add your home navigation logic here
+        }
+
+        function goBack() {
+            alert('बैक पर गए!');
+            // Add your back navigation logic here
+        }
+
+        function goRecent() {
+            alert('रीसेंट पर गए!');
+            // Add your recent navigation logic here
         }
     </script>
 </body>
-</html>
+                </html>
