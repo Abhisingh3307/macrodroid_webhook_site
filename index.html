@@ -3,75 +3,108 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MacroDroid Webhook Control Panel</title>
+<title>MacroDroid Automation</title>
 <style>
-  body { font-family: Arial,sans-serif; padding:1rem; background:#f0f0f0; }
-  #panel { background:#fff; padding:1rem; border-radius:8px; max-width:500px; margin:auto; box-shadow:0 0 10px #ccc; }
-  h2 { text-align:center; }
-  input,button { width:100%; padding:0.5rem; margin:0.3rem 0; }
-  button { background:#007bff; color:#fff; border:none; border-radius:4px; cursor:pointer; }
-  button:hover { background:#0056b3; }
-  #logBox { background:#222; color:#0f0; padding:0.5rem; height:200px; overflow-y:auto; font-family:monospace; border-radius:4px; }
-  #commands { display:none; max-height:400px; overflow-y:auto; }
+  body {
+    background: linear-gradient(135deg, #a96ed8, #7e3cd4);
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    color: #fff;
+  }
+  .box {
+    background: #333;
+    padding: 10px;
+    border-radius: 8px;
+    margin: 10px 0;
+  }
+  h2 {
+    text-align: center;
+    color: #0ff;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .actions button {
+    background: #f35;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    flex: 1 1 45%;
+  }
+  .log {
+    background: #222;
+    padding: 10px;
+    border-radius: 8px;
+    min-height: 100px;
+    overflow-y: auto;
+  }
 </style>
 </head>
 <body>
-  <div id="panel">
-    <h2>MacroDroid Webhook Control</h2>
-    <input id="webhookUrl" placeholder="Paste webhook URL" />
-    <button id="proceedBtn">Proceed</button>
-    <div id="commands"></div>
-    <h3>Logs</h3>
-    <div id="logBox"></div>
-  </div>
+
+<h2>MacroDroid Automation</h2>
+
+<div class="box">
+  <label>Enter Webhook URL:</label><br/>
+  <input id="webhookInput" placeholder="https://trigger.macrodroid.com/your-id" style="width:100%;" /><br/>
+  <button onclick="setUrl()">Proceed</button>
+</div>
+
+<div class="box">
+  <h3>Popup (Toast)</h3>
+  <input id="toastInput" placeholder="Input:" style="width:100%;" />
+  <button onclick="sendCommand('popup', { message: document.getElementById('toastInput').value })">Test</button>
+</div>
+
+<div class="actions">
+  <!-- Buttons as per your screenshot's labels -->
+  <button onclick="sendCommand('recent')">Recent</button>
+  <button onclick="sendCommand('home')">Home</button>
+  <button onclick="sendCommand('back')">Back</button>
+  <button onclick="sendCommand('dndOn')">DND ON</button>
+  <button onclick="sendCommand('dndOff')">DND OFF</button>
+  <button onclick="sendCommand('lockScreen')">Lock Screen</button>
+  <button onclick="sendCommand('wifiOn')">WiFi On</button>
+  <button onclick="sendCommand('wifiOff')">WiFi Off</button>
+  <button onclick="sendCommand('torchToggle')">Torch Toggle</button>
+  <button onclick="sendCommand('bluetoothOn')">Bluetooth On</button>
+  <button onclick="sendCommand('bluetoothOff')">Bluetooth Off</button>
+  <button onclick="sendCommand('takeSelfie')">Take Selfie</button>
+  <button onclick="sendCommand('hotspotOn')">Hotspot On</button>
+  <button onclick="sendCommand('hotspotOff')">Hotspot Off</button>
+  <button onclick="sendCommand('expandNotificationBar')">Expand Notification Bar</button>
+  <button onclick="sendCommand('collapseNotificationBar')">Collapse Notification Bar</button>
+  <button onclick="sendCommand('ringAlarmAtFullVolume')">Ring Alarm At Full Volume</button>
+  <button onclick="sendCommand('stopAlarm')">Stop Alarm</button>
+  <button onclick="sendCommand('disableMd')">Disable MD</button>
+  <!-- Add remaining commands as per your UI -->
+</div>
+
+<h3>Logs:</h3>
+<div class="log" id="logBox"></div>
 
 <script>
-  const webhookUrlInput = document.getElementById('webhookUrl');
-  const proceedBtn = document.getElementById('proceedBtn');
-  const commandsDiv = document.getElementById('commands');
-  const logBox = document.getElementById('logBox');
-
-  // Example list of 29 MacroDroid actions
-  const actionNames = [
-    "Enable WiFi","Enable Bluetooth","Toggle Silent Mode","Start Music",
-    "Stop Music","Take Screenshot","Open Browser","Flashlight On","Flashlight Off",
-    "Send Notification","Show Toast","Vibrate","Set Volume","Play Sound","Launch App",
-    "Enable Mobile Data","Disable Mobile Data","Speak Text","Take Photo","Record Video",
-    "Lock Device","Unlock Device","Battery Saver On","Battery Saver Off","Reboot Device",
-    "Location On","Location Off","Airplane Mode On","Airplane Mode Off"
-  ];
-
-  proceedBtn.onclick = () => {
-    if (!webhookUrlInput.value.trim()) return alert('Please enter webhook URL first!');
-    webhookUrlInput.disabled = true;
-    proceedBtn.disabled = true;
-    commandsDiv.innerHTML = '';
-    commandsDiv.style.display = 'block';
-    actionNames.forEach((name, idx) => {
-      const btn = document.createElement('button');
-      btn.innerText = name;
-      btn.onclick = () => triggerCommand(name, idx+1);
-      commandsDiv.appendChild(btn);
-    });
-  };
-
-  function triggerCommand(name, index) {
-    const baseUrl = webhookUrlInput.value.trim();
-    const fullUrl = `${baseUrl}?action=${encodeURIComponent(name)}`;
-    fetch(fullUrl)
-      .then(res => {
-        log(`✅ ${name} triggered successfully`);
-      })
-      .catch(err => {
-        log(`❌ ${name} failed`);
-      });
+let webhookUrl = '';
+function setUrl() {
+  webhookUrl = document.getElementById('webhookInput').value.trim();
+  log('Webhook URL set.');
+}
+function log(msg) {
+  document.getElementById('logBox').innerHTML += msg + '<br>';
+}
+function sendCommand(command, params = {}) {
+  if (!webhookUrl) {
+    log('Error: Please set Webhook URL.');
+    return;
   }
-
-  function log(msg) {
-    const timestamp = new Date().toLocaleTimeString();
-    logBox.innerText += `[${timestamp}] ${msg}\n`;
-    logBox.scrollTop = logBox.scrollHeight;
-  }
+  fetch(`${webhookUrl}?command=${command}&${new URLSearchParams(params)}`)
+    .then(res => log(`${command}: Success`))
+    .catch(err => log(`${command}: Failed (${err})`));
+}
 </script>
 </body>
 </html>
