@@ -1,171 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MacroDroid Automation</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MacroDroid Webhook Control Panel</title>
 <style>
-  body {
-    background: #aa66cc;
-    font-family: Arial, sans-serif;
-    padding: 20px;
-    color: white;
-  }
-  h1 {
-    text-align: center;
-    color: #40ffff;
-  }
-  .card {
-    background: #2d2c2c;
-    padding: 15px;
-    border-radius: 8px;
-    margin: 10px auto;
-    width: 90%;
-    max-width: 400px;
-  }
-  label {
-    font-weight: bold;
-  }
-  input, select, textarea {
-    width: 100%;
-    padding: 5px;
-    margin: 5px 0 10px 0;
-    border-radius: 4px;
-    border: none;
-  }
-  button {
-    background: #ff0066;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  #logs {
-    background: #333;
-    padding: 10px;
-    min-height: 100px;
-    border-radius: 4px;
-  }
+  body { font-family: Arial,sans-serif; padding:1rem; background:#f0f0f0; }
+  #panel { background:#fff; padding:1rem; border-radius:8px; max-width:500px; margin:auto; box-shadow:0 0 10px #ccc; }
+  h2 { text-align:center; }
+  input,button { width:100%; padding:0.5rem; margin:0.3rem 0; }
+  button { background:#007bff; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+  button:hover { background:#0056b3; }
+  #logBox { background:#222; color:#0f0; padding:0.5rem; height:200px; overflow-y:auto; font-family:monospace; border-radius:4px; }
+  #commands { display:none; max-height:400px; overflow-y:auto; }
 </style>
 </head>
 <body>
-
-<h1>MacroDroid Automation</h1>
-
-<div class="card">
-  <label>Enter Webhook URL:</label>
-  <input id="webhook" placeholder="https://trigger.macrodroid.com/your-id/enablewebhook">
-</div>
-
-<!-- Toast -->
-<div class="card">
-  <label>Popup (Toast):</label>
-  <input id="toastInput" placeholder="Your Toast Message">
-  <button onclick="send('toast', {message: document.getElementById('toastInput').value})">Test</button>
-</div>
-
-<!-- Notification -->
-<div class="card">
-  <label>Show Notification:</label>
-  <input id="notifTitle" placeholder="Title">
-  <input id="notifDesc" placeholder="Description">
-  <button onclick="send('notification', {title: notifTitle.value, desc: notifDesc.value})">Test</button>
-</div>
-
-<!-- Speak -->
-<div class="card">
-  <label>Speak Something:</label>
-  <input id="speakInput" placeholder="Input text">
-  <button onclick="send('speak', {message: speakInput.value})">Test</button>
-</div>
-
-<!-- Floating Text -->
-<div class="card">
-  <label>Floating Text:</label>
-  <input id="floatInput" placeholder="Your Floating Text">
-  <button onclick="send('floating', {message: floatInput.value})">Test</button>
-  <button onclick="send('disable_floating', {})">Disable Floating Text</button>
-</div>
-
-<!-- Paste Text -->
-<div class="card">
-  <label>Paste Text:</label>
-  <input id="pasteInput" placeholder="Text to Paste">
-  <button onclick="send('paste_text', {message: pasteInput.value})">Test</button>
-  <button onclick="send('clear_input', {})">Clear Input Field</button>
-</div>
-
-<!-- Dim Screen -->
-<div class="card">
-  <label>Dim Screen (0-100):</label>
-  <input id="dimInput" type="number" min="0" max="100" placeholder="Dim level">
-  <button onclick="send('dim_screen', {level: dimInput.value})">Test</button>
-  <button onclick="send('dim_screen_off', {})">Dim Off</button>
-</div>
-
-<!-- Brightness Control -->
-<div class="card">
-  <label>Control Brightness (0-100):</label>
-  <input id="brightInput" type="number" min="0" max="100" placeholder="Brightness level">
-  <button onclick="send('control_brightness', {level: brightInput.value})">Test</button>
-</div>
-
-<!-- Variable Control -->
-<div class="card">
-  <label>Variable Control:</label>
-  <input id="varName" placeholder="Variable Name">
-  <input id="varValue" placeholder="Variable Value">
-  <button onclick="send('set_variable', {name: varName.value, value: varValue.value})">Test</button>
-</div>
-
-<!-- Screenshot -->
-<div class="card">
-  <button onclick="send('screenshot', {})">Take Screenshot</button>
-</div>
-
-<!-- Recent Apps, Home, Back -->
-<div class="card">
-  <button onclick="send('recent', {})">Recent</button>
-  <button onclick="send('home', {})">Home</button>
-  <button onclick="send('back', {})">Back</button>
-</div>
-
-<!-- Toggles -->
-<div class="card">
-  <button onclick="send('dnd_on', {})">DND On</button>
-  <button onclick="send('dnd_off', {})">DND Off</button>
-  <button onclick="send('lock_screen', {})">Lock Screen</button>
-  <button onclick="send('wifi_on', {})">WiFi On</button>
-  <button onclick="send('wifi_off', {})">WiFi Off</button>
-  <button onclick="send('torch_toggle', {})">Torch Toggle</button>
-  <button onclick="send('bluetooth_on', {})">Bluetooth On</button>
-  <button onclick="send('bluetooth_off', {})">Bluetooth Off</button>
-  <button onclick="send('take_selfie', {})">Take Selfie</button>
-  <button onclick="send('hotspot_on', {})">Hotspot On</button>
-  <button onclick="send('hotspot_off', {})">Hotspot Off</button>
-  <button onclick="send('expand_notif', {})">Expand Notification</button>
-  <button onclick="send('collapse_notif', {})">Collapse Notification</button>
-  <button onclick="send('ring_full', {})">Ring Full Volume</button>
-  <button onclick="send('stop_alarm', {})">Stop Alarm</button>
-  <button onclick="send('disable_md', {})">Disable MacroDroid</button>
-</div>
-
-<h3>Logs:</h3>
-<div id="logs"></div>
+  <div id="panel">
+    <h2>MacroDroid Webhook Control</h2>
+    <input id="webhookUrl" placeholder="Paste webhook URL" />
+    <button id="proceedBtn">Proceed</button>
+    <div id="commands"></div>
+    <h3>Logs</h3>
+    <div id="logBox"></div>
+  </div>
 
 <script>
-function send(action, params) {
-  const url = document.getElementById('webhook').value;
-  if(!url) { alert('Please enter webhook URL'); return; }
-  fetch(`${url}?action=${action}&data=${encodeURIComponent(JSON.stringify(params))}`)
-    .then(() => log(`Sent: ${action}`))
-    .catch(() => log(`Error sending: ${action}`));
-}
-function log(message) {
-  const logBox = document.getElementById('logs');
-  logBox.innerText += message + "\\n";
-}
+  const webhookUrlInput = document.getElementById('webhookUrl');
+  const proceedBtn = document.getElementById('proceedBtn');
+  const commandsDiv = document.getElementById('commands');
+  const logBox = document.getElementById('logBox');
+
+  // Example list of 29 MacroDroid actions
+  const actionNames = [
+    "Enable WiFi","Enable Bluetooth","Toggle Silent Mode","Start Music",
+    "Stop Music","Take Screenshot","Open Browser","Flashlight On","Flashlight Off",
+    "Send Notification","Show Toast","Vibrate","Set Volume","Play Sound","Launch App",
+    "Enable Mobile Data","Disable Mobile Data","Speak Text","Take Photo","Record Video",
+    "Lock Device","Unlock Device","Battery Saver On","Battery Saver Off","Reboot Device",
+    "Location On","Location Off","Airplane Mode On","Airplane Mode Off"
+  ];
+
+  proceedBtn.onclick = () => {
+    if (!webhookUrlInput.value.trim()) return alert('Please enter webhook URL first!');
+    webhookUrlInput.disabled = true;
+    proceedBtn.disabled = true;
+    commandsDiv.innerHTML = '';
+    commandsDiv.style.display = 'block';
+    actionNames.forEach((name, idx) => {
+      const btn = document.createElement('button');
+      btn.innerText = name;
+      btn.onclick = () => triggerCommand(name, idx+1);
+      commandsDiv.appendChild(btn);
+    });
+  };
+
+  function triggerCommand(name, index) {
+    const baseUrl = webhookUrlInput.value.trim();
+    const fullUrl = `${baseUrl}?action=${encodeURIComponent(name)}`;
+    fetch(fullUrl)
+      .then(res => {
+        log(`✅ ${name} triggered successfully`);
+      })
+      .catch(err => {
+        log(`❌ ${name} failed`);
+      });
+  }
+
+  function log(msg) {
+    const timestamp = new Date().toLocaleTimeString();
+    logBox.innerText += `[${timestamp}] ${msg}\n`;
+    logBox.scrollTop = logBox.scrollHeight;
+  }
 </script>
 </body>
 </html>
