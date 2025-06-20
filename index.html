@@ -59,33 +59,6 @@
         button:hover {
             background-color: #cc0000;
         }
-        .quick-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-        .quick-actions button {
-            flex: 1 1 calc(33.33% - 5px);
-            background-color: #ff9800;
-        }
-        .quick-actions button:hover {
-            background-color: #f57c00;
-        }
-        #webhookUrl {
-            background-color: #00aaff;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            text-align: center;
-        }
-        .logo {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .logo img {
-            width: 100px;
-            height: auto;
-        }
         .navigation {
             display: flex;
             justify-content: space-between;
@@ -103,9 +76,6 @@
 </head>
 <body>
     <div class="container">
-        <div class="logo">
-            <img src="https://via.placeholder.com/100?text=Fail+OK" alt="Fail OK Logo">
-        </div>
         <h2>MacroDroid ऑटोमेशन</h2>
         <div id="webhookUrl">
             अपना वेबहुक URL नीचे दर्ज करें:<br>
@@ -131,50 +101,6 @@
             <button onclick="sendCommand('speak')">भेजें</button>
         </div>
 
-        <div class="section">
-            <h3>फ्लोटिंग टेक्स्ट</h3>
-            <input type="text" id="floatInput" placeholder="टेक्स्ट">
-            <button onclick="sendCommand('float')">भेजें</button>
-        </div>
-
-        <div class="section">
-            <h3>टेक्स्ट पेस्ट करें</h3>
-            <input type="text" id="pasteInput" placeholder="टेक्स्ट">
-            <button onclick="sendCommand('paste')">भेजें</button>
-        </div>
-
-        <div class="section">
-            <h3>स्क्रीन डिम करें</h3>
-            <input type="text" id="dimInput" placeholder="0-100">
-            <button onclick="sendCommand('dimScreen')">भेजें</button>
-        </div>
-
-        <div class="section">
-            <h3>ब्राइटनेस नियंत्रण</h3>
-            <input type="text" id="brightnessInput" placeholder="0-100">
-            <button onclick="sendCommand('controlBrightness')">भेजें</button>
-        </div>
-
-        <div class="section">
-            <h3>त्वरित एक्शन्स</h3>
-            <div class="quick-actions">
-                <button onclick="sendCommand('wifiOn')">WIFI ON</button>
-                <button onclick="sendCommand('wifiOff')">WIFI OFF</button>
-                <button onclick="sendCommand('lockScreen')">Lock Screen</button>
-                <button onclick="sendCommand('bluetoothOn')">Bluetooth On</button>
-                <button onclick="sendCommand('bluetoothOff')">Bluetooth Off</button>
-                <button onclick="sendCommand('takeSelfie')">Take Selfie</button>
-                <button onclick="sendCommand('hotspotOn')">Hotspot On</button>
-                <button onclick="sendCommand('hotspotOff')">Hotspot Off</button>
-                <button onclick="sendCommand('expandNotification')">Expand Notification</button>
-                <button onclick="sendCommand('collapseBar')">Collapse Bar</button>
-                <button onclick="sendCommand('ringAlarm')">Ring Alarm</button>
-                <button onclick="sendCommand('fullVolume')">Full Volume</button>
-                <button onclick="sendCommand('stopAlarm')">Stop Alarm</button>
-                <button onclick="sendCommand('disableMD')">Disable MD</button>
-            </div>
-        </div>
-
         <div class="navigation">
             <button onclick="goHome()">Home</button>
             <button onclick="goBack()">Back</button>
@@ -189,6 +115,7 @@
             webhookUrl = document.getElementById('webhookInput').value;
             if (webhookUrl) {
                 alert('वेबहुक URL सेव हो गया!');
+                console.log('Saved Webhook URL:', webhookUrl);
             } else {
                 alert('कृपया एक वैध URL दर्ज करें!');
             }
@@ -204,10 +131,8 @@
             if (command === 'toast') data.message = document.getElementById('toastInput').value || 'Default Toast';
             if (command === 'notification') data.message = document.getElementById('notificationInput').value || 'Default Notification';
             if (command === 'speak') data.text = document.getElementById('speakInput').value || 'Default Text';
-            if (command === 'float') data.text = document.getElementById('floatInput').value || 'Default Float';
-            if (command === 'paste') data.text = document.getElementById('pasteInput').value || 'Default Paste';
-            if (command === 'dimScreen') data.value = document.getElementById('dimInput').value || '50';
-            if (command === 'controlBrightness') data.value = document.getElementById('brightnessInput').value || '50';
+
+            console.log('Sending Command:', command, 'Data:', data);
 
             fetch(webhookUrl, {
                 method: 'POST',
@@ -215,26 +140,33 @@
                 body: JSON.stringify(data)
             })
             .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
+                console.log('Response Status:', response.status);
+                return response.text(); // सादा टेक्स्ट प्राप्त करें
             })
-            .then(data => alert('कमांड भेजी गई: ' + command))
-            .catch(error => alert('कमांड भेजने में त्रुटि: ' + error.message));
+            .then(text => {
+                console.log('Response Text:', text);
+                if (text.trim() === 'OK' || text.includes('OK')) {
+                    alert('कमांड भेजी गई: ' + command);
+                } else {
+                    throw new Error('अप्रत्याशित रिस्पॉन्स: ' + text);
+                }
+            })
+            .catch(error => {
+                alert('कमांड भेजने में त्रुटि: ' + error.message);
+                console.error('Error:', error);
+            });
         }
 
         function goHome() {
             alert('होम पर गए!');
-            // Add your home navigation logic here
         }
 
         function goBack() {
             alert('बैक पर गए!');
-            // Add your back navigation logic here
         }
 
         function goRecent() {
             alert('रीसेंट पर गए!');
-            // Add your recent navigation logic here
         }
     </script>
 </body>
