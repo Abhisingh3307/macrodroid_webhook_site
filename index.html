@@ -11,7 +11,7 @@
       padding: 2rem;
       background: #f0f0f0;
     }
-    #control-panel, #login-panel {
+    #control-panel {
       background: white;
       padding: 2rem;
       border-radius: 8px;
@@ -37,69 +37,21 @@
       background: #0056b3;
     }
   </style>
-
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 </head>
 <body>
-  <div id="login-panel">
-    <h2>Sign in to continue</h2>
-    <button id="login-btn">Sign in with Google</button>
-  </div>
 
-  <div id="control-panel" style="display:none;">
+  <div id="control-panel">
     <h2>MacroDroid Control Panel</h2>
-    <input type="text" id="webhook-url" placeholder="Enter Webhook URL"/>
+    <input type="text" id="webhook-url" placeholder="Enter Webhook URL" />
     <br>
     <button onclick="triggerWebhook()">Trigger Webhook</button>
     <div>
       <button onclick="showToast()">Show Toast</button>
       <button onclick="showNotification()">Show Notification</button>
-      <button onclick="logout()">Logout</button>
     </div>
   </div>
 
   <script>
-    // TODO: Replace below with your Firebase config
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      appId: "YOUR_APP_ID"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    const loginBtn = document.getElementById("login-btn");
-    const loginPanel = document.getElementById("login-panel");
-    const controlPanel = document.getElementById("control-panel");
-
-    loginBtn.addEventListener("click", () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then(() => {
-          loginPanel.style.display = "none";
-          controlPanel.style.display = "block";
-        })
-        .catch((error) => {
-          alert("Login failed: " + error.message);
-        });
-    });
-
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        loginPanel.style.display = "none";
-        controlPanel.style.display = "block";
-      } else {
-        controlPanel.style.display = "none";
-        loginPanel.style.display = "block";
-      }
-    });
-
-    function logout() {
-      auth.signOut();
-    }
-
     function triggerWebhook() {
       const url = document.getElementById("webhook-url").value;
       if (!url) {
@@ -127,5 +79,6 @@
       }
     }
   </script>
+
 </body>
 </html>
