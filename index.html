@@ -1,84 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MacroDroid Webhook Panel</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 2rem;
-      background: #f0f0f0;
-    }
-    #control-panel {
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      max-width: 400px;
-      margin: 2rem auto;
-    }
-    input {
-      width: 80%;
-      padding: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    button {
-      padding: 0.6rem 1.2rem;
-      margin: 0.3rem;
-      border: none;
-      background: #007bff;
-      color: white;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MacroDroid Control Panel</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 1rem;
+    background: #ffffff;
+    color: #333333;
+  }
+  h1 {
+    text-align: center;
+  }
+  label, .card {
+    display: block;
+    margin: 1rem auto;
+    max-width: 400px;
+  }
+  input {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  .card {
+    background: #f0f0f0;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+  .signal {
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 1rem;
+    height: 1rem;
+    display: inline-block;
+    margin-left: 0.5rem;
+  }
+  .signal.green { background: green; }
+  .signal.red { background: red; }
+  button {
+    padding: 0.5rem 1rem;
+    margin: 0.2rem;
+    cursor: pointer;
+  }
+</style>
 </head>
 <body>
 
-  <div id="control-panel">
-    <h2>MacroDroid Control Panel</h2>
-    <input type="text" id="webhook-url" placeholder="Enter Webhook URL" />
-    <br>
-    <button onclick="triggerWebhook()">Trigger Webhook</button>
-    <div>
-      <button onclick="showToast()">Show Toast</button>
-      <button onclick="showNotification()">Show Notification</button>
-    </div>
-  </div>
+<h1>MacroDroid Control Panel</h1>
 
-  <script>
-    function triggerWebhook() {
-      const url = document.getElementById("webhook-url").value;
-      if (!url) {
-        alert("Please enter a Webhook URL");
-        return;
-      }
-      fetch(url)
-        .then(() => alert("Webhook triggered successfully!"))
-        .catch(() => alert("Webhook trigger failed."));
-    }
+<label>Base URL:
+  <input id="baseUrl" placeholder="Enter MacroDroid URL" />
+</label>
 
-    function showToast() {
-      alert("This is a toast message!");
-    }
+<div class="card">
+  <button onclick="triggerAction('toast')">Show Toast</button>
+  <span id="signal-toast" class="signal red"></span><br>
 
-    function showNotification() {
-      if (Notification.permission === "granted") {
-        new Notification("Hello from MacroDroid Panel!");
-      } else if (Notification.permission !== "denied") {
-        Notification.requestPermission().then(permission => {
-          if (permission === "granted") {
-            new Notification("Hello from MacroDroid Panel!");
-          }
-        });
-      }
-    }
-  </script>
+  <button onclick="triggerAction('notification')">Show Notification</button>
+  <span id="signal-notification" class="signal red"></span><br>
+
+  <button onclick="triggerAction('speak')">Speak Message</button>
+  <span id="signal-speak" class="signal red"></span><br>
+</div>
+
+<script>
+function triggerAction(type) {
+  const baseUrl = document.getElementById('baseUrl').value;
+  if (!baseUrl) { alert('Please enter Base URL'); return; }
+  fetch(baseUrl)
+    .then(() => {
+      document.getElementById('signal-' + type).className = 'signal green';
+    })
+    .catch(() => {
+      document.getElementById('signal-' + type).className = 'signal red';
+    });
+}
+</script>
 
 </body>
 </html>
