@@ -1,83 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MacroDroid Control Panel</title>
+<meta charset="UTF-8">
+<title>MacroDroid Automation Control</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    padding: 1rem;
-    background: #ffffff;
-    color: #333333;
-  }
-  h1 {
-    text-align: center;
-  }
-  label, .card {
-    display: block;
-    margin: 1rem auto;
-    max-width: 400px;
-  }
-  input {
-    width: 100%;
-    padding: 0.5rem;
-    margin-top: 0.5rem;
-  }
-  .card {
-    background: #f0f0f0;
-    padding: 1rem;
-    border-radius: 8px;
-  }
-  .signal {
-    padding: 0.5rem;
-    border-radius: 50%;
-    width: 1rem;
-    height: 1rem;
-    display: inline-block;
-    margin-left: 0.5rem;
-  }
-  .signal.green { background: green; }
-  .signal.red { background: red; }
-  button {
-    padding: 0.5rem 1rem;
-    margin: 0.2rem;
-    cursor: pointer;
-  }
+  body { font-family: Arial,sans-serif; background: #f3f3f3; padding: 1rem; text-align: center; }
+  h1 { color: #333; }
+  .panel { background: #fff; padding: 1rem; border-radius: 8px; margin: 1rem auto; max-width: 600px; box-shadow: 0 0 5px rgba(0,0,0,.1); }
+  input { padding: 0.5rem; width: 80%; margin-bottom: 0.5rem; }
+  button { padding: 0.4rem 0.8rem; margin: 0.2rem; background: #007bff; border: none; color: white; border-radius: 4px; cursor: pointer; }
+  button:disabled { background: #ccc; cursor: not-allowed; }
+  .logs { max-height: 200px; overflow-y: auto; padding: 0.5rem; background: #222; color: #0f0; font-family: monospace; }
+  .log-error { color: #f00; }
+  .status { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-left: 0.5rem; }
+  .status.green { background: green; } .status.red { background: red; }
 </style>
 </head>
 <body>
-
-<h1>MacroDroid Control Panel</h1>
-
-<label>Base URL:
-  <input id="baseUrl" placeholder="Enter MacroDroid URL" />
-</label>
-
-<div class="card">
-  <button onclick="triggerAction('toast')">Show Toast</button>
-  <span id="signal-toast" class="signal red"></span><br>
-
-  <button onclick="triggerAction('notification')">Show Notification</button>
-  <span id="signal-notification" class="signal red"></span><br>
-
-  <button onclick="triggerAction('speak')">Speak Message</button>
-  <span id="signal-speak" class="signal red"></span><br>
+<h1>MacroDroid Automation Control</h1>
+<div class="panel">
+  <input id="webhook-url" placeholder="Enter Webhook Base URL"/><br>
+  <button id="set-url">Set URL</button><br>
+</div>
+<div class="panel" id="commands" style="display:none;">
+  <h3>Quick Actions</h3>
+  <button onclick="sendCommand('toast')">Show Toast</button>
+  <button onclick="sendCommand('notify')">Show Notification</button>
+  <button onclick="sendCommand('speak')">Speak</button>
+  <button onclick="sendCommand('floating_text')">Floating Text</button>
+  <button onclick="sendCommand('paste_text')">Paste Text</button>
+  <button onclick="sendCommand('dim_screen')">Dim Screen</button>
+  <button onclick="sendCommand('bright_control')">Control Brightness</button>
+  <button onclick="sendCommand('variable_control')">Variable Control</button>
+  <button onclick="sendCommand('dnd_on')">DND On</button>
+  <button onclick="sendCommand('dnd_off')">DND Off</button>
+  <button onclick="sendCommand('wifi_on')">WiFi On</button>
+  <button onclick="sendCommand('wifi_off')">WiFi Off</button>
+  <button onclick="sendCommand('bluetooth_on')">Bluetooth On</button>
+  <button onclick="sendCommand('bluetooth_off')">Bluetooth Off</button>
+  <button onclick="sendCommand('hotspot_on')">Hotspot On</button>
+  <button onclick="sendCommand('hotspot_off')">Hotspot Off</button>
+  <button onclick="sendCommand('expand_notif')">Expand Notification</button>
+  <button onclick="sendCommand('collapse_notif')">Collapse Notification</button>
+  <button onclick="sendCommand('ring_alarm')">Ring Alarm</button>
+  <button onclick="sendCommand('stop_alarm')">Stop Alarm</button>
+  <button onclick="sendCommand('disable_macro')">Disable Macro</button>
+  <button onclick="sendCommand('take_selfie')">Take Selfie</button>
+  <button onclick="sendCommand('torch_toggle')">Torch Toggle</button>
+  <button onclick="sendCommand('lock_screen')">Lock Screen</button>
+  <button onclick="sendCommand('full_volume')">Full Volume</button>
+</div>
+<div class="panel">
+  <h3>Logs</h3>
+  <div class="logs" id="log"></div>
 </div>
 
 <script>
-function triggerAction(type) {
-  const baseUrl = document.getElementById('baseUrl').value;
-  if (!baseUrl) { alert('Please enter Base URL'); return; }
-  fetch(baseUrl)
-    .then(() => {
-      document.getElementById('signal-' + type).className = 'signal green';
-    })
-    .catch(() => {
-      document.getElementById('signal-' + type).className = 'signal red';
-    });
+let baseUrl = '';
+document.getElementById('set-url').onclick = () => {
+  const input = document.getElementById('webhook-url').value.trim();
+  if(input) {
+    baseUrl = input;
+    document.getElementById('commands').style.display='block';
+    log(`URL set to: ${baseUrl}`, true);
+  } else {
+    log('Please enter a valid URL!', false);
+  }
+};
+
+function sendCommand(action) {
+  if(!baseUrl) return;
+  const url = `${baseUrl}/${action}`;
+  fetch(url).then(res=>{
+    log(`${action} -> OK`, true);
+  }).catch(err=>{
+    log(`${action} -> FAILED`, false);
+  })
+}
+
+function log(msg, success) {
+  const logDiv = document.getElementById('log');
+  const div = document.createElement('div');
+  div.textContent = msg;
+  div.classList.add(success?'':'log-error');
+  logDiv.prepend(div);
 }
 </script>
-
 </body>
 </html>
