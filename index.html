@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MacroDroid Webhook Panel</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background: #f0f0f0;
+    }
+    #control-panel, #login-panel {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: 2rem auto;
+    }
+    input {
+      width: 80%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      margin: 0.3rem;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <div id="login-panel">
+    <h2>Sign in to continue</h2>
+    <button id="login-btn">Sign in with Google</button>
+  </div>
+
+  <div id="control-panel" style="display:none;">
+    <h2>MacroDroid Control Panel</h2>
+    <input type="text" id="webhook-url" placeholder="Enter Webhook URL"/>
+    <br>
+    <button onclick="triggerWebhook()">Trigger Webhook</button>
+    <div>
+      <button onclick="showToast()">Show Toast</button>
+      <button onclick="showNotification()">Show Notification</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <script>
+    // TODO: Replace below with your Firebase config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const loginBtn = document.getElementById("login-btn");
+    const loginPanel = document.getElementById("login-panel");
+    const controlPanel = document.getElementById("control-panel");
+
+    loginBtn.addEventListener("click", () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(() => {
+          loginPanel.style.display = "none";
+          controlPanel.style.display = "block";
+        })
+        .catch((error) => {
+          alert("Login failed: " + error.message);
+        });
+    });
+
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        loginPanel.style.display = "none";
+        controlPanel.style.display = "block";
+      } else {
+        controlPanel.style.display = "none";
+        loginPanel.style.display = "block";
+      }
+    });
+
+    function logout() {
+      auth.signOut();
+    }
+
+    function triggerWebhook() {
+      const url = document.getElementById("webhook-url").value;
+      if (!url) {
+        alert("Please enter a Webhook URL");
+        return;
+      }
+      fetch(url)
+        .then(() => alert("Webhook triggered successfully!"))
+        .catch(() => alert("Webhook trigger failed."));
+    }
+
+    function showToast() {
+      alert("This is a toast message!");
+    }
+
+    function showNotification() {
+      if (Notification.permission === "granted") {
+        new Notification("Hello from MacroDroid Panel!");
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") {
+            new Notification("Hello from MacroDroid Panel!");
+          }
+        });
+      }
+    }
+  </script>
+</body>
+</html>
