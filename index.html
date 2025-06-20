@@ -6,114 +6,166 @@
 <title>MacroDroid Automation</title>
 <style>
   body {
-    background: linear-gradient(135deg, #a24dd3, #8e44ad);
+    background: #aa66cc;
     font-family: Arial, sans-serif;
-    padding: 1rem;
-    color: #fff;
+    padding: 20px;
+    color: white;
   }
   h1 {
     text-align: center;
-    color: #42f5e6;
-    text-shadow: 1px 1px 8px #000;
-    margin-bottom: 1rem;
+    color: #40ffff;
   }
-  .main-box, .command-box {
-    background: #222;
+  .card {
+    background: #2d2c2c;
+    padding: 15px;
     border-radius: 8px;
-    padding: 1rem;
-    margin: 0.5rem 0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    margin: 10px auto;
+    width: 90%;
+    max-width: 400px;
   }
   label {
-    display: block;
-    margin-top: 0.5rem;
+    font-weight: bold;
   }
-  input {
+  input, select, textarea {
     width: 100%;
-    padding: 0.4rem;
-    border: none;
+    padding: 5px;
+    margin: 5px 0 10px 0;
     border-radius: 4px;
-    margin-top: 0.2rem;
+    border: none;
   }
   button {
-    background: #e91e63;
-    padding: 0.3rem 0.7rem;
+    background: #ff0066;
+    color: white;
+    padding: 8px 16px;
     border: none;
     border-radius: 4px;
-    color: #fff;
     cursor: pointer;
-    margin-top: 0.3rem;
   }
-  button:hover {
-    background: #c2185b;
-  }
-  .logs {
+  #logs {
     background: #333;
-    padding: 0.5rem;
+    padding: 10px;
+    min-height: 100px;
     border-radius: 4px;
-    margin-top: 1rem;
-    height: 200px;
-    overflow-y: auto;
-    font-size: 0.9rem;
   }
-  .log-entry {
-    padding: 0.2rem;
-    border-bottom: 1px solid #555;
-  }
-  .log-entry.success { color: #2ecc71; }
-  .log-entry.error { color: #e74c3c; }
 </style>
 </head>
 <body>
 
 <h1>MacroDroid Automation</h1>
 
-<div class="main-box">
-  <label>Enter Your Webhook URL:</label>
-  <input id="webhookUrl" placeholder="https://trigger.macrodroid.com/your-id/enablewebhook">
-  <small>Disclaimer: This site will never store your webhook URL. Developed with Abhishek Chauhan ❤️.</small>
+<div class="card">
+  <label>Enter Webhook URL:</label>
+  <input id="webhook" placeholder="https://trigger.macrodroid.com/your-id/enablewebhook">
 </div>
 
-<!-- Example Action -->
-<div class="command-box">
-  <h3>Popup (Toast)</h3>
-  <label>Input:</label>
+<!-- Toast -->
+<div class="card">
+  <label>Popup (Toast):</label>
   <input id="toastInput" placeholder="Your Toast Message">
-  <button onclick="sendCommand('popup', { message: document.getElementById('toastInput').value })">Test</button>
+  <button onclick="send('toast', {message: document.getElementById('toastInput').value})">Test</button>
 </div>
 
-<!-- Sabhi doosri commands bhi is tarah add kar lo -->
+<!-- Notification -->
+<div class="card">
+  <label>Show Notification:</label>
+  <input id="notifTitle" placeholder="Title">
+  <input id="notifDesc" placeholder="Description">
+  <button onclick="send('notification', {title: notifTitle.value, desc: notifDesc.value})">Test</button>
+</div>
+
+<!-- Speak -->
+<div class="card">
+  <label>Speak Something:</label>
+  <input id="speakInput" placeholder="Input text">
+  <button onclick="send('speak', {message: speakInput.value})">Test</button>
+</div>
+
+<!-- Floating Text -->
+<div class="card">
+  <label>Floating Text:</label>
+  <input id="floatInput" placeholder="Your Floating Text">
+  <button onclick="send('floating', {message: floatInput.value})">Test</button>
+  <button onclick="send('disable_floating', {})">Disable Floating Text</button>
+</div>
+
+<!-- Paste Text -->
+<div class="card">
+  <label>Paste Text:</label>
+  <input id="pasteInput" placeholder="Text to Paste">
+  <button onclick="send('paste_text', {message: pasteInput.value})">Test</button>
+  <button onclick="send('clear_input', {})">Clear Input Field</button>
+</div>
+
+<!-- Dim Screen -->
+<div class="card">
+  <label>Dim Screen (0-100):</label>
+  <input id="dimInput" type="number" min="0" max="100" placeholder="Dim level">
+  <button onclick="send('dim_screen', {level: dimInput.value})">Test</button>
+  <button onclick="send('dim_screen_off', {})">Dim Off</button>
+</div>
+
+<!-- Brightness Control -->
+<div class="card">
+  <label>Control Brightness (0-100):</label>
+  <input id="brightInput" type="number" min="0" max="100" placeholder="Brightness level">
+  <button onclick="send('control_brightness', {level: brightInput.value})">Test</button>
+</div>
+
+<!-- Variable Control -->
+<div class="card">
+  <label>Variable Control:</label>
+  <input id="varName" placeholder="Variable Name">
+  <input id="varValue" placeholder="Variable Value">
+  <button onclick="send('set_variable', {name: varName.value, value: varValue.value})">Test</button>
+</div>
+
+<!-- Screenshot -->
+<div class="card">
+  <button onclick="send('screenshot', {})">Take Screenshot</button>
+</div>
+
+<!-- Recent Apps, Home, Back -->
+<div class="card">
+  <button onclick="send('recent', {})">Recent</button>
+  <button onclick="send('home', {})">Home</button>
+  <button onclick="send('back', {})">Back</button>
+</div>
+
+<!-- Toggles -->
+<div class="card">
+  <button onclick="send('dnd_on', {})">DND On</button>
+  <button onclick="send('dnd_off', {})">DND Off</button>
+  <button onclick="send('lock_screen', {})">Lock Screen</button>
+  <button onclick="send('wifi_on', {})">WiFi On</button>
+  <button onclick="send('wifi_off', {})">WiFi Off</button>
+  <button onclick="send('torch_toggle', {})">Torch Toggle</button>
+  <button onclick="send('bluetooth_on', {})">Bluetooth On</button>
+  <button onclick="send('bluetooth_off', {})">Bluetooth Off</button>
+  <button onclick="send('take_selfie', {})">Take Selfie</button>
+  <button onclick="send('hotspot_on', {})">Hotspot On</button>
+  <button onclick="send('hotspot_off', {})">Hotspot Off</button>
+  <button onclick="send('expand_notif', {})">Expand Notification</button>
+  <button onclick="send('collapse_notif', {})">Collapse Notification</button>
+  <button onclick="send('ring_full', {})">Ring Full Volume</button>
+  <button onclick="send('stop_alarm', {})">Stop Alarm</button>
+  <button onclick="send('disable_md', {})">Disable MacroDroid</button>
+</div>
 
 <h3>Logs:</h3>
-<div class="logs" id="logPanel"></div>
+<div id="logs"></div>
 
 <script>
-function logMessage(msg, isError=false) {
-  const logPanel = document.getElementById('logPanel');
-  const entry = document.createElement('div');
-  entry.textContent = msg;
-  entry.className = 'log-entry ' + (isError ? 'error' : 'success');
-  logPanel.prepend(entry);
+function send(action, params) {
+  const url = document.getElementById('webhook').value;
+  if(!url) { alert('Please enter webhook URL'); return; }
+  fetch(`${url}?action=${action}&data=${encodeURIComponent(JSON.stringify(params))}`)
+    .then(() => log(`Sent: ${action}`))
+    .catch(() => log(`Error sending: ${action}`));
 }
-
-function sendCommand(endpoint, params) {
-  const urlInput = document.getElementById('webhookUrl').value;
-  if (!urlInput) {
-    logMessage('Error: Webhook URL not set!', true);
-    return;
-  }
-  let fullUrl = urlInput + '?action=' + encodeURIComponent(endpoint);
-  if (params) {
-    for (const [k,v] of Object.entries(params)) {
-      fullUrl += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(v);
-    }
-  }
-  fetch(fullUrl).then(res => {
-    if(res.ok) logMessage(`Action "${endpoint}" successful ✅`);
-    else logMessage(`Action "${endpoint}" failed ❌ (status ${res.status})`, true);
-  }).catch(err => logMessage(`Error: ${err}`, true));
+function log(message) {
+  const logBox = document.getElementById('logs');
+  logBox.innerText += message + "\\n";
 }
 </script>
-
 </body>
 </html>
